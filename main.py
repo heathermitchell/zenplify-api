@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from notion_client import Client
 import os
 from pathlib import Path
@@ -14,6 +15,8 @@ DB_NAME = "Master Tree"
 
 notion = Client(auth=NOTION_TOKEN)
 app = Flask(__name__)
+CORS(app)
+
 
 # --- Helpers ---
 def get_or_create_database():
