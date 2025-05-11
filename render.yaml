@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: zenplify-api
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn -w 2 -b 0.0.0.0:5000 main:app"
+    pythonVersion: 3.11
