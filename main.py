@@ -70,7 +70,7 @@ def validate_input(data):
 
 @app.route("/add", methods=["POST"])
 def add_item():
-    data = request.get_json()
+    data = request.get_json(force=True)
 
     if not data:
         return jsonify({"error": "Invalid or missing JSON"}), 400
@@ -101,7 +101,7 @@ def add_item():
 
 @app.route("/create_table", methods=["POST"])
 def create_table():
-    data = request.get_json()
+    data = request.get_json(force=True) or {}
     table_name = data.get("table")
     fields = data.get("fields")
 
@@ -140,10 +140,10 @@ def create_table():
 
 @app.route("/add_column", methods=["POST"])
 def add_column():
-    data = request.get_json()
+    data = request.get_json(force=True)
     db_id = data.get("database_id")
     column = data.get("column")
-    col_type = data.get("type")  # e.g., "rich_text"
+    col_type = data.get("type")
 
     if not db_id or not column or not col_type:
         return jsonify({"error": "Missing required fields"}), 400
@@ -163,7 +163,7 @@ def add_column():
 
 @app.route("/insert", methods=["POST"])
 def insert_row():
-    data = request.get_json()
+    data = request.get_json(force=True)
     db_id = data.get("database_id")
     values = data.get("values")
 
