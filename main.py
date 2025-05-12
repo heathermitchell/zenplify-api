@@ -94,7 +94,7 @@ def add_item():
             )
 
         safe_notion_call(add_page)
-        return jsonify({"message": "Item added successfully!"}), 201
+        return jsonify({"message": "OK"}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -133,7 +133,7 @@ def create_table():
             )
 
         db = safe_notion_call(create_db)
-        return jsonify({"message": "Database created", "database_id": db["id"]}), 200
+        return jsonify({"message": "OK", "database_id": db["id"]}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -156,7 +156,7 @@ def add_column():
             )
 
         safe_notion_call(update_db)
-        return jsonify({"message": f"Column '{column}' added."}), 200
+        return jsonify({"message": "OK"}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -182,7 +182,7 @@ def insert_row():
             )
 
         safe_notion_call(insert_page)
-        return jsonify({"message": "Row inserted successfully"}), 200
+        return jsonify({"message": "OK"}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
