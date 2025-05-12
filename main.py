@@ -109,13 +109,20 @@ def create_table():
         return jsonify({"error": "Missing table name or fields"}), 400
 
     try:
-        properties = {
-            name: {"rich_text": {}} if field_type == "rich_text" else {"rich_text": {}}
-            for name, field_type in fields.items()
-        }
+        # Convert fields into Notion property format
+        properties = {}
+        for name, ftype in fields.items():
+            if ftype == "rich_text":
+                properties[name] = {"rich_text": {}}
+            elif ftype == "title":
+                properties[name] = {"title": {}}
+            elif ftype == "select":
+                properties[name] = {"select": {}}
+            else:
+                properties[name] = {"rich_text": {}}  # default fallback
 
-        # Ensure at least one title property
-        if not any("title" in p for p in properties.values()):
+        # Ensure at least one title field
+        if not any("title" in prop for prop in properties.values()):
             properties["Name"] = {"title": {}}
 
         def create_db():
