@@ -70,3 +70,89 @@ def add_item():
         notion.pages.create(
             parent={"database_id": db_id},
             properties={
+                "Tree": {"title": [{"text": {"content": data["Tree"]}}]},
+                "Type": {"rich_text": [{"text": {"content": data["Type"]}}]},
+                "Status": {"select": {"name": data["Status"]}},
+                "Notes": {"rich_text": [{"text": {"content": data["Notes"]}}]},
+            }
+        )
+        return jsonify({"message": "Item added successfully!"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/create_table", methods=["POST"])
+def create_table():
+    data = request.get_json()
+    table_name = data.get("table")
+    fields = data.get("fields")  # Dict of field_name: type (e.g. {"Topic": "rich_text"})
+
+    if not table_name or not fields:
+        return jsonify({"error": "Missing table name or fields"}), 400
+
+    try:
+        properties = {
+            name: {"rich_text": {} if t == "rich_text" else {}} for name, t in fields.items()
+        }
+        # Add a title field if none specified
+        if not any(f for f in properties if properties[f] == {"title": {}}):
+            properties["Name"] = {"title": {}}
+
+        db = notion.databases.create(
+            parent={"type": "page_id", "page_id": PAGE_ID},
+            title=[{"type": "text", "text": {"content": table_name}}],
+            properties=properties
+        )
+        return jsonify({"message": "Database created", "database_id": db["id"]}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/add_column", methods=["POST"])
+def add_column():
+    data = request.get_json()
+    db_id = data.get("database_id")
+    column = data.get("column")
+    col_type = data.get("type")  # e.g. "rich_text", "select", etc.
+
+    if not db_id or not column or not col_type:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    try:
+        notion.databases.update(
+            database_id=db_id,
+            properties={
+                column: {"rich_text": {} if col_type == "rich_text" else {}}
+            }
+        )
+        return jsonify({"message": f"Column '{column}' added."}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/insert", methods=["POST"])
+def insert_row():
+    data = request.get_json()
+    db_id = data.get("database_id")
+    values = data.get("values")
+
+    if not db_id or not values:
+        return jsonify({"error": "Missing database_id or values"}), 400
+
+    try:
+        properties = {}
+        for k, v in values.items():
+            properties[k] = {"rich_text": [{"text": {"content": v}}]}
+
+        notion.pages.create(
+            parent={"database_id": db_id},
+            properties=properties
+        )
+        return jsonify({"message": "Row inserted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/health")
+def health():
+    return "OK", 200
+
+# --- Local Dev Run ---
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
