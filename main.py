@@ -5,18 +5,18 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()  # Loads .env if running locally
+# --- Load environment variables ---
+load_dotenv()
 
 # --- Config ---
 NOTION_TOKEN = os.getenv("NOTION_TOKEN")
-PAGE_ID = os.getenv("NOTION_PAGE_ID")  # Your Notion page where the database lives
+PAGE_ID = os.getenv("NOTION_PAGE_ID")  # Your root Notion page where databases live
 DB_CACHE_FILE = Path("/tmp/database_id.txt")
 DB_NAME = "Master Tree"
 
 notion = Client(auth=NOTION_TOKEN)
 app = Flask(__name__)
 CORS(app)
-
 
 # --- Helpers ---
 def get_or_create_database():
@@ -53,6 +53,7 @@ def validate_input(data):
     return True, None
 
 # --- Routes ---
+
 @app.route("/add", methods=["POST"])
 def add_item():
     data = request.get_json()
@@ -69,20 +70,3 @@ def add_item():
         notion.pages.create(
             parent={"database_id": db_id},
             properties={
-                "Tree": {"title": [{"text": {"content": data["Tree"]}}]},
-                "Type": {"rich_text": [{"text": {"content": data["Type"]}}]},
-                "Status": {"select": {"name": data["Status"]}},
-                "Notes": {"rich_text": [{"text": {"content": data["Notes"]}}]},
-            }
-        )
-        return jsonify({"message": "Item added successfully!"}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route("/health")
-def health():
-    return "OK", 200
-
-# --- Local Dev Run ---
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
