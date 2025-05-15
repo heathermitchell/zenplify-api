@@ -80,7 +80,10 @@ def add_item():
         return jsonify({"error": msg}), 400
 
     try:
-        db_id = get_or_create_database()
+        # Hardcoded database ID (replace with your real working one if different)
+        db_id = "1f2d36e54a7280caae37000cf445f3ed"
+
+        print(f"Using DB ID: {db_id}")  # For debugging
 
         def add_page():
             return notion.pages.create(
@@ -93,8 +96,14 @@ def add_item():
                 }
             )
 
-        safe_notion_call(add_page)
+        page = safe_notion_call(add_page)
+        print(f"Page created with ID: {page['id']}")  # Debug info
         return jsonify({"message": "OK"}), 200
+
+    except Exception as e:
+        print(f"Error: {str(e)}")  # Debug info
+        return jsonify({"error": str(e)}), 500
+
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
